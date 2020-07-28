@@ -1,0 +1,42 @@
+version: "3"
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile-nginx
+    container_name: docker_test_nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./app:/symfony
+  php-fpm:
+    build:
+      context: ./docker/php-fpm
+      dockerfile: Dockerfile-php-fpm
+    container_name: docker_test_php_fpm
+    volumes:
+      - ./app:/symfony
+    depends_on:
+      - mysql
+  php-cli:
+    build:
+      context: ./docker/php-cli
+      dockerfile: Dockerfile-php-cli
+    container_name: docker_test_php_cli
+    command: sleep 10000
+    volumes:
+      - ./app:/symfony
+  mysql:
+    image: mysql:latest
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--default-authentication-plugin=mysql_native_password']
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: docker_test
+      MYSQL_USER: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    container_name: docker_test_mysql
+volumes:
+  mysql:
